@@ -20,7 +20,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Project Not Found</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            The project you're looking for doesn't exist.
+            The project you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                   </p>
                 </div>
                 <button
-                  onClick={() => useProjectStore.getState().toggleTodoCompleted(project.id, index)}
+                  onClick={() => useProjectStore.getState().toggleTodoCompleted(todo.id)}
                   className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                     todo.completed
                       ? 'bg-green-500 border-green-500 text-white'

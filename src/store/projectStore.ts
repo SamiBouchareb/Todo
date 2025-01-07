@@ -22,6 +22,7 @@ export interface Project {
   createdAt: string;
   todos: Todo[];
   completed: boolean;
+  prompt?: string;
 }
 
 interface ProjectStore {
@@ -29,7 +30,7 @@ interface ProjectStore {
   activeProjectId: string | null;
   addProject: (project: Project) => void;
   updateProject: (projectId: string, updates: Partial<Omit<Project, 'id'>>) => void;
-  setActiveProjectId: (projectId: string | null) => void;
+  setActiveProject: (projectId: string) => void;
   toggleTodoCompleted: (todoId: string) => void;
   getProject: (projectId: string) => Project | undefined;
   getTodoById: (todoId: string) => Todo | undefined;
@@ -58,7 +59,7 @@ export const useProjectStore = create<ProjectStore>()(
           p.id === projectId ? { ...p, ...updates } : p
         ),
       })),
-      setActiveProjectId: (projectId) => set({ activeProjectId: projectId }),
+      setActiveProject: (projectId) => set({ activeProjectId: projectId }),
       toggleTodoCompleted: (todoId) =>
         set((state) => ({
           projects: state.projects.map((project) => ({

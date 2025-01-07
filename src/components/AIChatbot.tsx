@@ -83,7 +83,7 @@ export default function AIChatbot({ isOpen, onClose, masterplanContext, onMinimi
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages.length]);
 
   const formatTimestamp = (date: Date) => {
     return new Intl.DateTimeFormat('en', {

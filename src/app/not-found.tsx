@@ -7,7 +7,7 @@ export default function NotFound() {
         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold mb-2">404 - Page Not Found</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          The page you're looking for doesn't exist.
+          The page you&apos;re looking for doesn&apos;t exist.
         </p>
       </div>
     </div>
