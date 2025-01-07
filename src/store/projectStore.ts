@@ -22,7 +22,7 @@ export interface Project {
   createdAt: string;
   todos: Todo[];
   completed: boolean;
-  prompt?: string;
+  prompt: string;
 }
 
 interface ProjectStore {

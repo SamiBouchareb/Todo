@@ -41,7 +41,7 @@ export default function Home() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const { user } = useAuth();
   
-  const { projects, activeProjectId, addProject, setActiveProjectId } = useProjectStore();
+  const { projects, activeProjectId, addProject, setActiveProject } = useProjectStore();
   const currentProject = projects.find(p => p.id === activeProjectId);
   const todos = currentProject?.todos || [];
 
@@ -54,12 +54,13 @@ export default function Home() {
         description: 'Default project for your todos',
         createdAt: new Date().toISOString(),
         todos: [],
-        completed: false
+        completed: false,
+        prompt: 'Default project'
       };
       addProject(defaultProject);
-      setActiveProjectId(defaultProject.id);
+      setActiveProject(defaultProject.id);
     }
-  }, [projects, addProject, setActiveProjectId]);
+  }, [projects, addProject, setActiveProject]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +98,31 @@ export default function Home() {
         order: todos.length + 1,
       }));
 
-      // Add todos to the current project
-      const updatedProject: Project = {
-        ...currentProject,
-        todos: [...currentProject.todos, ...generatedTodos]
-      };
-      addProject(updatedProject);
+      if (!currentProject) {
+        const newProject: Project = {
+          id: uuidv4(),
+          name: 'Generated Project',
+          description: 'Project generated from prompt',
+          createdAt: new Date().toISOString(),
+          todos: generatedTodos,
+          completed: false,
+          prompt: prompt
+        };
+        addProject(newProject);
+        setActiveProject(newProject.id);
+      } else {
+        // Add todos to the current project
+        const updatedProject: Project = {
+          id: currentProject.id,
+          name: currentProject.name,
+          description: currentProject.description,
+          createdAt: currentProject.createdAt,
+          completed: currentProject.completed,
+          prompt: currentProject.prompt || prompt,
+          todos: [...currentProject.todos, ...generatedTodos]
+        };
+        addProject(updatedProject);
+      }
 
       if (auth.currentUser) {
         try {
@@ -250,10 +270,11 @@ export default function Home() {
                           todo={todo}
                           todos={todos}
                           onRegenerate={async (todoId) => {
-                            const todoToRegenerate = todos.find(t => t.id === todoId);
-                            if (!todoToRegenerate) return;
-                            
                             try {
+                              const todoToRegenerate = todos.find(t => t.id === todoId);
+                              if (!todoToRegenerate || !currentProject) return;
+
+                              // Call API to regenerate todo
                               const response = await fetch('/api/todos', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -265,12 +286,22 @@ export default function Home() {
                               const data = await response.json();
                               const newTodo = data.todos[0];
                               
-                              const updatedProject = {
-                                ...currentProject,
+                              if (!currentProject) {
+                                console.error('No active project found');
+                                return;
+                              }
+
+                              const updatedProject: Project = {
+                                id: currentProject.id,
+                                name: currentProject.name,
+                                description: currentProject.description,
+                                createdAt: currentProject.createdAt,
+                                completed: currentProject.completed,
+                                prompt: currentProject.prompt || '',
                                 todos: todos.map(t => 
                                   t.id === todoId ? {
                                     ...t,
-                                    task: newTodo.title,
+                                    task: newTodo.title || t.task,
                                     category: newTodo.category || t.category,
                                     priority: newTodo.priority || t.priority,
                                     difficulty: newTodo.difficulty || t.difficulty,
@@ -285,8 +316,18 @@ export default function Home() {
                             }
                           }}
                           onToggleComplete={(todoId) => {
-                            const updatedProject = {
-                              ...currentProject,
+                            if (!currentProject) {
+                              console.error('No active project found');
+                              return;
+                            }
+
+                            const updatedProject: Project = {
+                              id: currentProject.id,
+                              name: currentProject.name,
+                              description: currentProject.description,
+                              createdAt: currentProject.createdAt,
+                              completed: currentProject.completed,
+                              prompt: currentProject.prompt || '',
                               todos: todos.map(t => 
                                 t.id === todoId ? { ...t, completed: !t.completed } : t
                               )
